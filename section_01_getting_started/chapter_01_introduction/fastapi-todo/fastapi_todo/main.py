@@ -1,14 +1,32 @@
+import time
+import logging
 from typing import List
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Depends
 from .models import TodoItem, TodoCreate
+from .dependencies import get_api_key
 
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
+# Setup app
 app = FastAPI()
 
 # In-memory store
 todos: List[TodoItem] = []
 next_id = 1
 
+@app.middleware("http")
+async def log_request(request: Request, call_next):
+    """Middleware to log request method, path, and execution time."""
+    start_time = time.time()
+    response = await call_next(request)
+    duration = time.time() - start_time
+    logging.info(f"{request.method} {request.url.path} completed in {duration:.4f}s")
+    return response
 
 @app.post("/todos", response_model=TodoItem, status_code=201)
 def create_todo(todo: TodoCreate) -> TodoItem:
@@ -50,6 +68,11 @@ def delete_todo(todo_id: int) -> TodoItem:
         todos = [todo for todo in todos if todo.id != todo_id]
         return deleted_todo
     raise HTTPException(status_code=404, detail="Todo item not found")
+
+@app.get("/secure-todos", dependencies=[Depends(get_api_key)])
+def secure_list_todos() -> List[TodoItem]:
+    """List todos, but only if API key is valid."""
+    return todos
 
 
 @app.get("/")
