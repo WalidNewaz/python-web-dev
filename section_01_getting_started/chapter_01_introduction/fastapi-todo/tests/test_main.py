@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 from fastapi_todo.main import app
+import json
 
 client = TestClient(app)
 
@@ -52,3 +53,26 @@ def test_delete_todo() -> None:
     response = client.get("/todos")
     data = response.json()
     assert len(data) == 0
+
+def test_secure_todos_without_key() -> None:
+    response = client.get("/secure-todos")
+    assert response.status_code == 422
+    data = response.json()
+    assert data["error"] == "Validation failed"
+    assert len(data["details"]) > 0
+    assert data["details"][0]["type"] == "missing"
+    assert data["details"][0]["loc"] == ["header", "x-api-key"]
+    assert data["details"][0]["msg"] == "Field required"
+
+def test_secure_todos_with_key() -> None:
+    response = client.get("/secure-todos", headers={"x-api-key": "secret-key"})
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 0
+
+def test_validation_error() -> None:
+    response = client.post("/todos", json={})
+    assert response.status_code == 422
+    body = response.json()
+    assert body["error"] == "Validation failed"
+    assert "details" in body

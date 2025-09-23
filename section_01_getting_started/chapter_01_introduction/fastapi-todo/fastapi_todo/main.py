@@ -5,7 +5,7 @@ from typing import List
 from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.exception_handlers import RequestValidationError
-from fastapi.exceptions import RequestValidationError
+# from fastapi.exceptions import RequestValidationError
 
 from .models import TodoItem, TodoCreate
 from .dependencies import get_api_key
