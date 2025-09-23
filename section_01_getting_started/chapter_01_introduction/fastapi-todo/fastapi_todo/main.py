@@ -3,6 +3,10 @@ import logging
 from typing import List
 
 from fastapi import FastAPI, HTTPException, Request, Depends
+from fastapi.responses import JSONResponse
+from fastapi.exception_handlers import RequestValidationError
+from fastapi.exceptions import RequestValidationError
+
 from .models import TodoItem, TodoCreate
 from .dependencies import get_api_key
 
@@ -27,6 +31,23 @@ async def log_request(request: Request, call_next):
     duration = time.time() - start_time
     logging.info(f"{request.method} {request.url.path} completed in {duration:.4f}s")
     return response
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc):
+    """Custom handler for validation errors."""
+    return JSONResponse(
+        status_code=422,
+        content={"error": "Validation failed", "details": exc.errors()},
+    )
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc):
+    """Custom handler for HTTP errors."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": exc.detail},
+    )
+
 
 @app.post("/todos", response_model=TodoItem, status_code=201)
 def create_todo(todo: TodoCreate) -> TodoItem:
