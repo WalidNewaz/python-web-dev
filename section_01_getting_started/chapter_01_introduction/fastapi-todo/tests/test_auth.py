@@ -15,4 +15,10 @@ def test_login_and_secure_access() -> None:
     assert response.status_code == 200
     assert isinstance(response.json(), list)
 
+def test_invalid_login() -> None:
+    response = client.post("/login", data={"username": "alice", "password": "wrong"})
+    assert response.status_code == 401
 
+def test_secure_route_without_token() -> None:
+    response = client.get("/secure-todos")
+    assert response.status_code == 401
