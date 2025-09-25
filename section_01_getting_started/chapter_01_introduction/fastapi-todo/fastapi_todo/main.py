@@ -2,13 +2,19 @@ import time
 import logging
 from typing import List
 
-from fastapi import FastAPI, HTTPException, Request, Depends
+from fastapi import FastAPI, HTTPException, Request, Depends, status
 from fastapi.responses import JSONResponse
 from fastapi.exception_handlers import RequestValidationError
-# from fastapi.exceptions import RequestValidationError
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from .models import TodoItem, TodoCreate
 from .dependencies import get_api_key
+from .auth import (
+    create_access_token,
+    decode_access_token,
+    get_password_hash,
+    verify_password,
+)
 
 # Setup logging
 logging.basicConfig(
@@ -22,6 +28,29 @@ app = FastAPI()
 # In-memory store
 todos: List[TodoItem] = []
 next_id = 1
+
+# OAuth2 scheme
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+# Fake user DB
+fake_users_db = {
+    "alice": {
+        "username": "alice",
+        "hashed_password": get_password_hash("wonderland"),
+    }
+}
+
+def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
+    """Extract current user from JWT token"""
+    try:
+        payload = decode_access_token(token)
+        username = payload.get("sub")
+        if not username:
+            raise HTTPException(status_code=401, detail="Invalid token payload")
+        return username
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
 
 @app.middleware("http")
 async def log_request(request: Request, call_next):
@@ -90,7 +119,18 @@ def delete_todo(todo_id: int) -> TodoItem:
         return deleted_todo
     raise HTTPException(status_code=404, detail="Todo item not found")
 
-@app.get("/secure-todos", dependencies=[Depends(get_api_key)])
+@app.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends()) -> dict[str, str]:
+    """Authenticate user and return JWT token."""
+    user = fake_users_db.get(form_data.username)
+    if not user or not verify_password(form_data.password, user["hashed_password"]):
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
+
+    access_token = create_access_token({"sub": form_data.username})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.get("/secure-todos", dependencies=[Depends(get_current_user)])
 def secure_list_todos() -> List[TodoItem]:
     """List todos, but only if API key is valid."""
     return todos
