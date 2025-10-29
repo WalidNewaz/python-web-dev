@@ -13,12 +13,10 @@ Each **section** in the series is represented as a top-level directory, and each
 
 ```
 /
-├── section_01_getting_started/
-│   └── chapter_01_introduction/
-├── section_02_fastapi/
-│   ├── chapter_02_first_fastapi_app/
+├── chapter_01/
 │   └── ...
-...
+├── chapter_02/
+└── ...
 ````
 
 Within each **chapter directory**, you will find:
