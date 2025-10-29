@@ -929,6 +929,18 @@ files = [
 ]
 
 [[package]]
+name = "types-passlib"
+version = "1.7.7.20250602"
+description = "Typing stubs for passlib"
+optional = false
+python-versions = ">=3.9"
+groups = ["dev"]
+files = [
+    {file = "types_passlib-1.7.7.20250602-py3-none-any.whl", hash = "sha256:ed73a91be9a22484ebd62cc0d127675ded542b892b99776db92dab760bbfe274"},
+    {file = "types_passlib-1.7.7.20250602.tar.gz", hash = "sha256:cf2350e78d36b6b09e4db44284d96651b57285f499cfabf111b616065abab7b3"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.15.0"
 description = "Backported and Experimental Type Hints for Python 3.9+"
@@ -978,4 +990,4 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10"
-content-hash = "3ec8e6447bbbbcd92bee0684122b2f96c60514e96758a3d7af161a374f8f58a9"
+content-hash = "d118ae5a2a01133b844d37ee6426b459a0da9078ae447bdfc18a6b924bd9b756"
