@@ -135,6 +135,32 @@ def secure_list_todos() -> List[TodoItem]:
     """List todos, but only if API key is valid."""
     return todos
 
+# Include your APIError and handler here
+class APIError(Exception):
+    def __init__(self, code: int, message: str, details: dict = None):
+        self.code = code
+        self.message = message
+        self.details = details or {}
+
+@app.exception_handler(APIError)
+async def api_error_handler(request: Request, exc: APIError):
+    return JSONResponse(
+        status_code=exc.code,
+        content={"message": exc.message, "details": exc.details}
+    )
+
+@app.get("/divide")
+def divide(a: float, b: float):
+    if b == 0:
+        raise APIError(
+            code=400,
+            message="Division by zero is not allowed",
+            details={"a": a, "b": b}
+        )
+    return {"result": a / b}
+
+
+
 
 @app.get("/")
 def read_root() -> dict[str, str]:
