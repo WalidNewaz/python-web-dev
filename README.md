@@ -1,6 +1,6 @@
 # Web Development with Python
 
-This repository contains the **companion code and solutions** for the tutorial series **Python Web Development**.
+This repository contains the **companion code and solutions** for the tutorial series [Python Web Development](https://www.walidnewaz.com/learn/python-web-dev/).
 
 This series is designed for **mid-level developers** who already have a strong foundation in Python and want to expand into building **scalable, production-ready web applications**.
 
