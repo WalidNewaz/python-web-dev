@@ -3,7 +3,7 @@ from typing import List
 from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.exception_handlers import RequestValidationError
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordRequestForm
 
 from .models import TodoItem, TodoCreate
 from .auth_service import (
@@ -25,9 +25,6 @@ register_request_logger(app)
 # In-memory store
 todos: List[TodoItem] = []
 next_id = 1
-
-# OAuth2 scheme
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 # Fake user DB
 fake_users_db = {
