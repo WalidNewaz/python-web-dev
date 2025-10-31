@@ -14,15 +14,20 @@ from .auth import (
     get_password_hash,
     verify_password,
 )
+from .logging_config import setup_logging
+from .logging_middleware import register_request_logger
 
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+# ---- logging setup (moved) ----
+setup_logging()
 
-# Setup app
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format='%(asctime)s - %(levelname)s - %(message)s'
+# )
+
+# ---- app ----
 app = FastAPI()
+register_request_logger(app)
 
 # In-memory store
 todos: List[TodoItem] = []
@@ -51,14 +56,14 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 
-@app.middleware("http")
-async def log_request(request: Request, call_next):
-    """Middleware to log request method, path, and execution time."""
-    start_time = time.time()
-    response = await call_next(request)
-    duration = time.time() - start_time
-    logging.info(f"{request.method} {request.url.path} completed in {duration:.4f}s")
-    return response
+# @app.middleware("http")
+# async def log_request(request: Request, call_next):
+#     """Middleware to log request method, path, and execution time."""
+#     start_time = time.time()
+#     response = await call_next(request)
+#     duration = time.time() - start_time
+#     logging.info(f"{request.method} {request.url.path} completed in {duration:.4f}s")
+#     return response
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc):
