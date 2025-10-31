@@ -8,7 +8,6 @@ from fastapi.exception_handlers import RequestValidationError
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from .models import TodoItem, TodoCreate
-from .dependencies import get_api_key
 from .auth import (
     create_access_token,
     decode_access_token,
@@ -160,12 +159,9 @@ def divide(a: float, b: float):
     return {"result": a / b}
 
 
-
-
 @app.get("/")
 def read_root() -> dict[str, str]:
     """Root endpoint returning a welcome message.
-
     :return:
         dict[str, str]: JSON response with a message.
     """
