@@ -1,29 +1,22 @@
-import time
-import logging
 from typing import List
 
-from fastapi import FastAPI, HTTPException, Request, Depends, status
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.exception_handlers import RequestValidationError
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from .models import TodoItem, TodoCreate
-from .auth import (
+from .auth_service import (
     create_access_token,
-    decode_access_token,
     get_password_hash,
     verify_password,
+    get_current_user,
 )
 from .logging_config import setup_logging
 from .logging_middleware import register_request_logger
 
 # ---- logging setup (moved) ----
 setup_logging()
-
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format='%(asctime)s - %(levelname)s - %(message)s'
-# )
 
 # ---- app ----
 app = FastAPI()
@@ -43,27 +36,6 @@ fake_users_db = {
         "hashed_password": get_password_hash("wonderland"),
     }
 }
-
-def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
-    """Extract current user from JWT token"""
-    try:
-        payload = decode_access_token(token)
-        username = payload.get("sub")
-        if not username:
-            raise HTTPException(status_code=401, detail="Invalid token payload")
-        return username
-    except Exception:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-
-
-# @app.middleware("http")
-# async def log_request(request: Request, call_next):
-#     """Middleware to log request method, path, and execution time."""
-#     start_time = time.time()
-#     response = await call_next(request)
-#     duration = time.time() - start_time
-#     logging.info(f"{request.method} {request.url.path} completed in {duration:.4f}s")
-#     return response
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc):
