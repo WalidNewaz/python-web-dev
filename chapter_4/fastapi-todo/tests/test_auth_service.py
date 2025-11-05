@@ -51,3 +51,32 @@ def test_authenticate_success():
     creds = HTTPBasicCredentials(username="admin", password="secret")
     result = auth_service.authenticate(creds)
     assert result == "admin"
+
+def test_authenticate_wrong_username():
+    creds = HTTPBasicCredentials(username="user", password="secret")
+    with pytest.raises(HTTPException) as excinfo:
+        auth_service.authenticate(creds)
+    exc = excinfo.value
+    assert exc.status_code == status.HTTP_401_UNAUTHORIZED
+    assert exc.detail == "Incorrect username or password"
+    assert exc.headers["WWW-Authenticate"] == "Basic"
+
+def test_authenticate_wrong_password():
+    creds = HTTPBasicCredentials(username="admin", password="wrong")
+    with pytest.raises(HTTPException) as excinfo:
+        auth_service.authenticate(creds)
+    exc = excinfo.value
+    assert exc.status_code == status.HTTP_401_UNAUTHORIZED
+    assert exc.detail == "Incorrect username or password"
+    assert exc.headers["WWW-Authenticate"] == "Basic"
+
+def test_authenticate_both_wrong():
+    creds = HTTPBasicCredentials(username="foo", password="bar")
+    with pytest.raises(HTTPException) as excinfo:
+        auth_service.authenticate(creds)
+    assert excinfo.value.status_code == 401
+
+def test_authenticate_empty_credentials():
+    creds = HTTPBasicCredentials(username="", password="")
+    with pytest.raises(HTTPException):
+        auth_service.authenticate(creds)
