@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 from typing import Optional, Dict
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
+from fastapi.security import HTTPBasicCredentials, HTTPBasic
+import secrets
 
 # ---------------------------------------------------------------------
 # Configuration
@@ -14,6 +16,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+security = HTTPBasic()
 
 
 # ---------------------------------------------------------------------
@@ -60,3 +63,19 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
     if not username:
         raise HTTPException(status_code=401, detail="Invalid token payload")
     return username
+
+def authenticate(credentials: HTTPBasicCredentials = Depends(security)):
+    """
+    Performs basic auth authentication check.
+    :param credentials:
+    :return:
+    """
+    correct_username = secrets.compare_digest(credentials.username, "admin")
+    correct_password = secrets.compare_digest(credentials.password, "secret")
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username

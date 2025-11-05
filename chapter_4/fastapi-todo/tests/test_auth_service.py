@@ -1,6 +1,7 @@
 import pytest
-from fastapi import HTTPException
 from fastapi_todo import auth_service
+from fastapi import HTTPException, status
+from fastapi.security import HTTPBasicCredentials
 
 
 def test_get_password_hash_and_verify():
@@ -45,3 +46,8 @@ def test_get_current_user_invalid(monkeypatch):
     with pytest.raises(auth_service.HTTPException) as exc_info:
         auth_service.get_current_user(token=bad_token)
     assert exc_info.value.status_code == 401
+
+def test_authenticate_success():
+    creds = HTTPBasicCredentials(username="admin", password="secret")
+    result = auth_service.authenticate(creds)
+    assert result == "admin"

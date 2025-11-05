@@ -19,6 +19,7 @@ from .auth_service import (
     create_access_token,
     verify_password,
     get_current_user,
+    authenticate,
 )
 from .logging_config import setup_logging
 from .logging_middleware import register_request_logger
@@ -99,6 +100,10 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()) -> dict[str, str]:
 def secure_list_todos() -> List[TodoItem]:
     """List todos, but only if API key is valid."""
     return db.todos
+
+@app.get("/profile")
+def read_profile(username: str = Depends(authenticate)):
+    return {"message": f"Hello, {username}!"}
 
 # ---- Utility Routes ----
 
