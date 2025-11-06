@@ -19,7 +19,7 @@ from .auth_service import (
     create_access_token,
     verify_password,
     get_current_user,
-    authenticate,
+    authenticate_basic,
 )
 from .logging_config import setup_logging
 from .logging_middleware import register_request_logger
@@ -102,7 +102,7 @@ def secure_list_todos() -> List[TodoItem]:
     return db.todos
 
 @app.get("/profile")
-def read_profile(username: str = Depends(authenticate)):
+def read_profile(username: str = Depends(authenticate_basic)):
     return {"message": f"Hello, {username}!"}
 
 # ---- Utility Routes ----

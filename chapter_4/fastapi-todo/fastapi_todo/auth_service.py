@@ -64,7 +64,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
         raise HTTPException(status_code=401, detail="Invalid token payload")
     return username
 
-def authenticate(credentials: HTTPBasicCredentials = Depends(security)):
+def authenticate_basic(credentials: HTTPBasicCredentials = Depends(security)):
     """
     Performs basic auth authentication check.
     :param credentials:
