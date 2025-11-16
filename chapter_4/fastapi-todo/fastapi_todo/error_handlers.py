@@ -1,4 +1,4 @@
-from fastapi import Request, HTTPException
+from fastapi import Request, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.exception_handlers import RequestValidationError
 
@@ -27,9 +27,13 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 async def http_exception_handler(request: Request, exc: HTTPException):
     """Custom handler for general FastAPI HTTPException."""
+    headers = dict(exc.headers or {})
+    if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+        headers.setdefault("WWW-Authenticate", 'Basic realm="Restricted"')
     return JSONResponse(
         status_code=exc.status_code,
         content={"error": exc.detail},
+        headers=headers,
     )
 
 

@@ -14,8 +14,8 @@ def test_get_password_hash_and_verify():
 
 def test_create_and_decode_access_token():
     data = {"sub": "alice"}
-    token = auth_service.create_access_token(data)
-    payload = auth_service.decode_access_token(token)
+    token = auth_service.create_token(data)
+    payload = auth_service.decode_token(token)
     assert payload["sub"] == "alice"
     assert "exp" in payload
 
@@ -23,14 +23,14 @@ def test_create_and_decode_access_token():
 def test_decode_access_token_invalid():
     """Should raise if token is malformed."""
     with pytest.raises(HTTPException) as exc_info:
-        auth_service.decode_access_token("not-a-jwt")
+        auth_service.decode_token("not-a-jwt")
     assert exc_info.value.status_code == 401
     assert "Invalid or expired token" in exc_info.value.detail
 
 
 def test_get_current_user_valid(monkeypatch):
     """Directly test logic of get_current_user with a valid token."""
-    token = auth_service.create_access_token({"sub": "bob"})
+    token = auth_service.create_token({"sub": "bob"})
     username = auth_service.get_current_user(token=token)
     assert username == "bob"
 
