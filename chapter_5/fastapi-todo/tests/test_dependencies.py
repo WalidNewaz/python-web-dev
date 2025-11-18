@@ -1,6 +1,6 @@
 import pytest
 from fastapi import HTTPException
-from fastapi_todo.dependencies import get_api_key
+from app.dependencies import get_api_key
 
 def test_get_api_key_valid():
     """Should return the key when correct."""

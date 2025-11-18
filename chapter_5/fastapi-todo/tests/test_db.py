@@ -1,5 +1,5 @@
-from fastapi_todo import db
-from fastapi_todo.auth_service import verify_password
+from app import db
+from app.auth_service import verify_password
 
 def test_fake_user_db_structure():
     assert "alice" in db.fake_users_db

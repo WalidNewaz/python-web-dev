@@ -3,8 +3,8 @@ import re
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from fastapi_todo.logging_config import setup_logging, LOG_FORMAT
-from fastapi_todo.logging_middleware import register_request_logger
+from app.logging_config import setup_logging, LOG_FORMAT
+from app.logging_middleware import register_request_logger
 
 
 def build_test_app() -> TestClient:

@@ -1,5 +1,5 @@
 import pytest
-from fastapi_todo.models import TodoItem, TodoCreate
+from app.models import TodoItem, TodoCreate
 from pydantic import ValidationError
 
 def test_todo_model_valid():

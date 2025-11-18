@@ -1,5 +1,5 @@
 import pytest
-from fastapi_todo import auth_service
+from app import auth_service
 from fastapi import HTTPException, status
 from fastapi.security import HTTPBasicCredentials
 
