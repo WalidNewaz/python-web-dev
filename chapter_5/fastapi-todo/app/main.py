@@ -1,5 +1,5 @@
 # ============================================================
-# 🚀 FastAPI Todo Application – Tutorial Edition
+# FastAPI Todo Application – Tutorial Edition
 # ============================================================
 # This file wires together the app, routes, and dependencies.
 # In future chapters, these routes will be split into separate
@@ -31,6 +31,9 @@ from .logging_middleware import register_request_logger
 from .db import UserDB, TodoDB
 from .error_handlers import register_error_handlers, APIError
 
+# ---- Routers ----
+from app.auth.router import router as auth_router
+
 # ---- Constants ----
 from .constants import TODO_NOT_FOUND
 
@@ -38,9 +41,10 @@ from .constants import TODO_NOT_FOUND
 setup_logging()
 
 # ---- app ----
-app = FastAPI()
+app = FastAPI(title="FastAPI Todo Application – Tutorial Edition")
 register_request_logger(app)
 register_error_handlers(app)
+app.include_router(auth_router)
 
 # ---- DB -----
 users = UserDB()
@@ -96,40 +100,40 @@ def secure_list_todos() -> List[TodoItem]:
 
 # ---- Auth Routes ----
 
-@app.post("/auth/token", response_model=Token, response_model_exclude_none=True)
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    """Authenticate user and return JWT token."""
-    fetched_user = users.get_user(username=form_data.username)
-    if not fetched_user or not verify_password(form_data.password, fetched_user["hashed_password"]):
-        raise HTTPException(status_code=401, detail="Incorrect username or password")
-
-    user = User(**{k: fetched_user[k] for k in ("username", "role", "scopes", "name", "email")})
-    access_token = create_token(
-        {"sub": user.username, "scopes": user.scopes},
-        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
-    refresh_token = create_token(
-        {"sub": user.username, "scopes": user.scopes, "type": "refresh"},
-        expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "expires_in": ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        "refresh_token": refresh_token,
-        "info": {
-            "name": user.name,
-            "email": user.email,
-        }
-    }
-
-@app.post("/auth/refresh", response_model=Token, response_model_exclude_none=True)
-def refresh_token_endpoint(refresh_token: str):
-    access_token = create_access_token_from_refresh(refresh_token)
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "expires_in": ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-    }
+# @app.post("/auth/token", response_model=Token, response_model_exclude_none=True)
+# def login(form_data: OAuth2PasswordRequestForm = Depends()):
+#     """Authenticate user and return JWT token."""
+#     fetched_user = users.get_user(username=form_data.username)
+#     if not fetched_user or not verify_password(form_data.password, fetched_user["hashed_password"]):
+#         raise HTTPException(status_code=401, detail="Incorrect username or password")
+#
+#     user = User(**{k: fetched_user[k] for k in ("username", "role", "scopes", "name", "email")})
+#     access_token = create_token(
+#         {"sub": user.username, "scopes": user.scopes},
+#         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+#     )
+#     refresh_token = create_token(
+#         {"sub": user.username, "scopes": user.scopes, "type": "refresh"},
+#         expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
+#     return {
+#         "access_token": access_token,
+#         "token_type": "bearer",
+#         "expires_in": ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+#         "refresh_token": refresh_token,
+#         "info": {
+#             "name": user.name,
+#             "email": user.email,
+#         }
+#     }
+#
+# @app.post("/auth/refresh", response_model=Token, response_model_exclude_none=True)
+# def refresh_token_endpoint(refresh_token: str):
+#     access_token = create_access_token_from_refresh(refresh_token)
+#     return {
+#         "access_token": access_token,
+#         "token_type": "bearer",
+#         "expires_in": ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+#     }
 
 
 # ---- Demo Routes ----
