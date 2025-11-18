@@ -101,7 +101,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """Authenticate user and return JWT token."""
     fetched_user = users.get_user(username=form_data.username)
     if not fetched_user or not verify_password(form_data.password, fetched_user["hashed_password"]):
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
 
     user = User(**{k: fetched_user[k] for k in ("username", "role", "scopes", "name", "email")})
     access_token = create_token(

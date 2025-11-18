@@ -59,7 +59,7 @@ def test_authenticate_wrong_username():
     exc = excinfo.value
     assert exc.status_code == status.HTTP_401_UNAUTHORIZED
     assert exc.detail == "Incorrect username or password"
-    assert exc.headers["WWW-Authenticate"] == "Basic"
+    assert exc.headers["WWW-Authenticate"] == 'Basic realm=\"Restricted\"'
 
 def test_authenticate_wrong_password():
     creds = HTTPBasicCredentials(username="admin", password="wrong")
@@ -68,7 +68,7 @@ def test_authenticate_wrong_password():
     exc = excinfo.value
     assert exc.status_code == status.HTTP_401_UNAUTHORIZED
     assert exc.detail == "Incorrect username or password"
-    assert exc.headers["WWW-Authenticate"] == "Basic"
+    assert exc.headers["WWW-Authenticate"] == 'Basic realm=\"Restricted\"'
 
 def test_authenticate_both_wrong():
     creds = HTTPBasicCredentials(username="foo", password="bar")

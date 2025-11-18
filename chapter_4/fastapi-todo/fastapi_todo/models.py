@@ -11,6 +11,7 @@ class TodoItem(BaseModel):
 class TodoCreate(BaseModel):
     """Model for creating a new Todo item."""
     title: str = Field(..., min_length=1, max_length=100)
+    completed: Optional[bool] = False
 
 class Token(BaseModel):
     access_token: str
