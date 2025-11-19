@@ -18,18 +18,28 @@ from app.auth_service import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     REFRESH_TOKEN_EXPIRE_DAYS
 )
-from app.db import UserDB
+from app.core.db import get_db
+from app.users.repository import UserRepository
+from app.users.service import UserService
+
 
 # ---- Router -----
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-# ---- DB -----
-users = UserDB()
+
+def get_user_service(db = Depends(get_db)) -> UserService:
+    repo = UserRepository(db)
+    return UserService(repo)
+
 
 @router.post("/token", response_model=Token, response_model_exclude_none=True)
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
+def login(
+        form_data: OAuth2PasswordRequestForm = Depends(),
+        user_service: UserService = Depends(get_user_service)
+):
     """Authenticate user and return JWT token."""
-    fetched_user = users.get_user(username=form_data.username)
+    print(form_data.username)
+    fetched_user = user_service.get_user(form_data.username)
     if not fetched_user or not verify_password(form_data.password, fetched_user["hashed_password"]):
         raise HTTPException(status_code=401, detail="Incorrect username or password")
 
@@ -53,7 +63,10 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     }
 
 @router.post("/refresh", response_model=Token, response_model_exclude_none=True)
-def refresh_token_endpoint(refresh_token: str):
+def refresh_token_endpoint(
+        refresh_token: str,
+        user_service: UserService = Depends(get_user_service)
+):
     access_token = create_access_token_from_refresh(refresh_token)
     return {
         "access_token": access_token,
