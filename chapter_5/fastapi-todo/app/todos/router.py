@@ -27,7 +27,7 @@ def get_todo_service(db=Depends(get_db)) -> TodoService:
 
 
 
-@router.get("", dependencies=[Depends(AuthService.get_current_user)])
+@router.get("", dependencies=[Depends(AuthService.get_current_user)], response_model=List[TodoItem])
 def list_todos(
         todo_service: TodoService = Depends(get_todo_service),
 ) -> List[TodoItem]:
@@ -64,7 +64,7 @@ def update_todo(
         raise HTTPException(status_code=404, detail=TODO_NOT_FOUND)
     return todo
 
-@router.delete("/{todo_id}", dependencies=[Depends(AuthService.get_current_user)])
+@router.delete("/{todo_id}", dependencies=[Depends(AuthService.get_current_user)], response_model=TodoItem)
 def delete_todo(todo_id: int, todo_service: TodoService = Depends(get_todo_service)):
     """Delete a Todo item by ID."""
     todo = todo_service.delete_todo(todo_id)
