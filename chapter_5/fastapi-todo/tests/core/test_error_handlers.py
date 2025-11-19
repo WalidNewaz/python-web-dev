@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
-from app.error_handlers import (
+from app.core.error_handlers import (
     APIError,
     register_error_handlers,
 )

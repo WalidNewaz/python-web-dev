@@ -35,9 +35,9 @@ class TodoRepository(TodoRepositoryProtocol):
         self.next_id += 1
         return new_todo
 
-    def get_todo(self, id: int) -> TodoItemEntity:
+    def get_todo(self, id: int):
         """Retrieve a Todo item by ID."""
-        found = next((todo for todo in self.db.todos if todo["id"] == id), None)
+        found = next((todo for todo in self.db.todos if todo.id == id), None)
         return found
 
     def update_todo(self, id: int, title: str, completed: bool) -> TodoItemEntity:
@@ -54,7 +54,7 @@ class TodoRepository(TodoRepositoryProtocol):
         """Deletes an item by ID."""
         for i, todo in enumerate(self.db.todos):
             if todo.id == id:
-                deleted_todo = self.todos.pop(i)
+                deleted_todo = self.db.todos.pop(i)
                 return deleted_todo
 
         return None

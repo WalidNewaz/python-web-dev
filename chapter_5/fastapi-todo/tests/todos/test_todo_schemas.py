@@ -1,5 +1,5 @@
 import pytest
-from app.models import TodoItem, TodoCreate
+from app.todos.schemas import TodoItem, TodoCreate
 from pydantic import ValidationError
 
 def test_todo_model_valid():

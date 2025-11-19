@@ -16,7 +16,7 @@ class TodoService:
     def create_todo(self, title: str, completed: bool) -> TodoItemEntity:
         return self.repository.create_todo(title=title, completed=completed)
 
-    def get_todo(self, todo_id: int) -> TodoItemEntity:
+    def get_todo(self, todo_id: int):
         return self.repository.get_todo(todo_id)
 
     def update_todo(self, todo_id: int, title: str, completed: bool) -> TodoItemEntity:

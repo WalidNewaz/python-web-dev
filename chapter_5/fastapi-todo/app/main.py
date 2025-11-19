@@ -10,15 +10,13 @@
 from pydantic import BaseModel
 
 # ---- Third-party packages ----
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, Depends
 
 # ---- Local application imports ----
-from .auth_service import (
-    authenticate_basic,
-)
-from .logging_config import setup_logging
-from .logging_middleware import register_request_logger
-from .error_handlers import register_error_handlers, APIError
+from app.auth.service import AuthService
+from app.core.logging_config import setup_logging
+from app.core.logging_middleware import register_request_logger
+from app.core.error_handlers import register_error_handlers, APIError
 
 # ---- Routers ----
 from app.auth.router import router as auth_router
@@ -47,7 +45,7 @@ class BasicAuthDemoResponse(BaseModel):
     message: str
 
 @app.get("/demo/basic-auth", response_model=BasicAuthDemoResponse)
-def read_profile(username: str = Depends(authenticate_basic)):
+def read_profile(username: str = Depends(AuthService.authenticate_basic)):
     """A simple demonstration of the basic auth mechanism."""
     return {"message": f"Hello, {username}!"}
 
