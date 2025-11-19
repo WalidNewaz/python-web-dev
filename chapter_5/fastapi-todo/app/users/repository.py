@@ -5,8 +5,6 @@ from typing import Protocol, Optional, Iterable
 from app.users.entities import UserEntity
 from app.core.db import DB
 
-import json
-
 
 class UserRepositoryProtocol(Protocol):
     def create_user(self, username: str, hashed_password: str) -> UserEntity: ...

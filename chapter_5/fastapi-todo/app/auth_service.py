@@ -29,24 +29,6 @@ basic_auth_scheme = HTTPBasic()
 
 
 # ---------------------------------------------------------------------
-# Password hashing and verification
-# ---------------------------------------------------------------------
-# def get_password_hash(password: str) -> str:
-#     """Hash plain password using bcrypt."""
-#     return pwd_context.hash(password)
-
-
-# def verify_password(plain_password: str, hashed_password: str) -> bool:
-#     """Verify plain password against hashed password."""
-#     return pwd_context.verify(plain_password, hashed_password)
-
-# def authenticate_user(username: str, password: str, users: Dict) -> Optional[User]:
-#     user = users.get(username)
-#     if not user or not verify_password(password, user["hashed_password"]):
-#         return None
-#     return User(**{k: user[k] for k in ("username", "role", "scopes", "name", "email")})
-
-# ---------------------------------------------------------------------
 # Token creation and decoding
 # ---------------------------------------------------------------------
 def decode_token(token: str) -> Dict:
@@ -64,22 +46,6 @@ def create_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-
-# def create_access_token_from_refresh(refresh_token: str) -> str:
-#     """Create JWT token from a refresh token."""
-#     try:
-#         payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
-#         if payload.get("type") != "refresh":
-#             raise HTTPException(status_code=401, detail="Invalid refresh token")
-#     except JWTError:
-#         raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
-#
-#     new_access_token = create_token(
-#         {"sub": payload.get('sub'), "scopes": payload.get("scopes")},
-#         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-#     )
-#
-#     return new_access_token
 
 # ---------------------------------------------------------------------
 # Dependency

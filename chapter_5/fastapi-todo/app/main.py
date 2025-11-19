@@ -7,28 +7,22 @@
 # ============================================================
 
 # ---- Standard library ----
-from typing import List
 from pydantic import BaseModel
 
 # ---- Third-party packages ----
 from fastapi import FastAPI, HTTPException, Depends
 
 # ---- Local application imports ----
-from .models import TodoItem, TodoCreate
 from .auth_service import (
-    get_current_user,
     authenticate_basic,
 )
 from .logging_config import setup_logging
 from .logging_middleware import register_request_logger
-from .db import TodoDB
 from .error_handlers import register_error_handlers, APIError
 
 # ---- Routers ----
 from app.auth.router import router as auth_router
-
-# ---- Constants ----
-from .constants import TODO_NOT_FOUND
+from app.todos.router import router as todos_router
 
 # ---- logging setup (moved) ----
 setup_logging()
@@ -37,60 +31,14 @@ setup_logging()
 app = FastAPI(title="FastAPI Todo Application – Tutorial Edition")
 register_request_logger(app)
 register_error_handlers(app)
-app.include_router(auth_router)
-
-# ---- DB -----
-todos = TodoDB()
-
-# ---- Todo CRUD Routes ----
-
-@app.post("/todos", response_model=TodoItem, status_code=201)
-def create_todo(todo: TodoCreate) -> TodoItem:
-    """Create a new Todo item."""
-    new_todo = todos.add_item(title=todo.title, completed=False)
-    return new_todo
-
-
-@app.get("/todos", response_model=List[TodoItem])
-def list_todos() -> List[TodoItem]:
-    """List all Todo items."""
-    return todos.get_all_todos()
-
-
-@app.get("/todos/{todo_id}", response_model=TodoItem)
-def get_todo(todo_id: int) -> TodoItem:
-    """Retrieve a Todo item by ID."""
-    todo = todos.get_todo(todo_id)
-    if todo is None:
-        raise HTTPException(status_code=404, detail=TODO_NOT_FOUND)
-    return todo
-
-
-@app.put("/todos/{todo_id}", response_model=TodoItem)
-def update_todo(todo_id: int, updated_todo: TodoCreate) -> TodoItem:
-    """Update a Todo item by ID."""
-    todo = todos.update_item(todo_id, updated_todo.title, updated_todo.completed)
-    if todo is None:
-        raise HTTPException(status_code=404, detail=TODO_NOT_FOUND)
-    return todo
-
-
-@app.delete("/todos/{todo_id}", response_model=TodoItem)
-def delete_todo(todo_id: int) -> TodoItem:
-    """Delete a Todo item by ID."""
-    todo = todos.delete_item(todo_id)
-    if todo is None:
-        raise HTTPException(status_code=404, detail=TODO_NOT_FOUND)
-    return todo
-
-# ---- Todo Secure CRUD Routes ----
-
-@app.get("/api/todos", dependencies=[Depends(get_current_user)])
-def secure_list_todos() -> List[TodoItem]:
-    """List todos, but only if API key is valid."""
-    return todos.get_all_todos()
 
 # ---- Auth Routes ----
+app.include_router(auth_router)
+
+
+# ---- Todo CRUD Routes ----
+app.include_router(todos_router)
+
 
 
 # ---- Demo Routes ----

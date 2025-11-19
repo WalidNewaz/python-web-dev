@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 import secrets
 
 from app.users.schemas import User
+from app.core.security import get_pwd_ctx
 
 
 # ---------------------------------------------------------------------
@@ -30,7 +31,8 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 basic_auth_scheme = HTTPBasic()
 
-
+def get_auth_service(pwd_context=Depends(get_pwd_ctx)):
+    return AuthService(pwd_context)
 
 class AuthService:
     def __init__(self, pwd_context):

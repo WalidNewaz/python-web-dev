@@ -43,4 +43,4 @@ fake_todos = []
 mock_db = DB(fake_users, fake_todos)
 
 def get_db() -> DB:
-    return DB(fake_users, fake_todos)
+    return mock_db

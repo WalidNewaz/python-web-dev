@@ -16,19 +16,20 @@ from app.core.db import get_db
 from app.core.security import get_pwd_ctx
 from app.users.repository import UserRepository
 from app.users.service import UserService
-from .service import AuthService, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
+from .service import (
+    AuthService,
+    get_auth_service,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    REFRESH_TOKEN_EXPIRE_DAYS
+)
 
 # ---- Router -----
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 def get_user_service(db=Depends(get_db)) -> UserService:
     repo = UserRepository(db)
     return UserService(repo)
-
-
-def get_auth_service(pwd_context=Depends(get_pwd_ctx)):
-    return AuthService(pwd_context)
 
 
 @router.post("/token", response_model=Token, response_model_exclude_none=True)

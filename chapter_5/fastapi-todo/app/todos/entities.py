@@ -3,7 +3,7 @@
 # ============================================================
 from dataclasses import dataclass
 
-@dataclass(frozen=True)
+@dataclass
 class TodoItemEntity:
     id: int = None
     title: str = None
