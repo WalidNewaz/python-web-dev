@@ -21,9 +21,7 @@ Each **section** in the series is represented as a top-level directory, and each
 
 Within each **chapter directory**, you will find:
 
-- `code/` → runnable code examples from the book
-- `resources/` → datasets, sample files, or other supporting material
-- `assignments/` → starter files and solutions for chapter assignments
+- runnable code examples from the book
 - `README.md` → notes and usage instructions
 
 ---
