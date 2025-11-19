@@ -13,14 +13,14 @@ class TodoCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=100)
     completed: Optional[bool] = False
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-    expires_in: Optional[datetime] = None
-    refresh_token: Optional[str] = None
-    scope: Optional[str] = None
-    uid: Optional[str] = None
-    info: Optional[dict] = None
+# class Token(BaseModel):
+#     access_token: str
+#     token_type: str
+#     expires_in: Optional[datetime] = None
+#     refresh_token: Optional[str] = None
+#     scope: Optional[str] = None
+#     uid: Optional[str] = None
+#     info: Optional[dict] = None
 
 
 class User(BaseModel):

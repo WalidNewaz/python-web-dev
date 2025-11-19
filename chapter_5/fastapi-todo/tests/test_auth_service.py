@@ -1,18 +1,21 @@
 import pytest
-from app import auth_service
 from fastapi import HTTPException, status
 from fastapi.security import HTTPBasicCredentials
+from jose import jwt
+
+from app.core.security import get_pwd_ctx
+from app.auth.service import AuthService, SECRET_KEY, ALGORITHM
 
 
-def test_get_password_hash_and_verify():
-    password = "wonderland"
-    hashed = auth_service.get_password_hash(password)
-    assert hashed != password
-    assert auth_service.verify_password(password, hashed)
-    assert not auth_service.verify_password("wrong", hashed)
+# Define a fixture to instantiate the service
+@pytest.fixture(scope="module")
+def auth_service():
+    pwd_context = get_pwd_ctx()
+    service_instance = AuthService(pwd_context=pwd_context)
+    return service_instance
 
 
-def test_create_and_decode_access_token():
+def test_create_and_decode_access_token(auth_service):
     data = {"sub": "alice"}
     token = auth_service.create_token(data)
     payload = auth_service.decode_token(token)
@@ -20,7 +23,7 @@ def test_create_and_decode_access_token():
     assert "exp" in payload
 
 
-def test_decode_access_token_invalid():
+def test_decode_access_token_invalid(auth_service):
     """Should raise if token is malformed."""
     with pytest.raises(HTTPException) as exc_info:
         auth_service.decode_token("not-a-jwt")
@@ -28,31 +31,31 @@ def test_decode_access_token_invalid():
     assert "Invalid or expired token" in exc_info.value.detail
 
 
-def test_get_current_user_valid(monkeypatch):
+def test_get_current_user_valid(auth_service):
     """Directly test logic of get_current_user with a valid token."""
     token = auth_service.create_token({"sub": "bob"})
     username = auth_service.get_current_user(token=token)
     assert username == "bob"
 
 
-def test_get_current_user_invalid(monkeypatch):
+def test_get_current_user_invalid(auth_service ):
     """Should raise if token missing 'sub'."""
-    bad_token = auth_service.jwt.encode(
+    bad_token = jwt.encode(
         {"no_sub": "x"},
-        auth_service.SECRET_KEY,
-        algorithm=auth_service.ALGORITHM,
+        SECRET_KEY,
+        algorithm=ALGORITHM,
     )
 
-    with pytest.raises(auth_service.HTTPException) as exc_info:
+    with pytest.raises(HTTPException) as exc_info:
         auth_service.get_current_user(token=bad_token)
     assert exc_info.value.status_code == 401
 
-def test_authenticate_success():
+def test_authenticate_success(auth_service ):
     creds = HTTPBasicCredentials(username="admin", password="secret")
     result = auth_service.authenticate_basic(creds)
     assert result == "admin"
 
-def test_authenticate_wrong_username():
+def test_authenticate_wrong_username(auth_service ):
     creds = HTTPBasicCredentials(username="user", password="secret")
     with pytest.raises(HTTPException) as excinfo:
         auth_service.authenticate_basic(creds)
@@ -61,7 +64,7 @@ def test_authenticate_wrong_username():
     assert exc.detail == "Incorrect username or password"
     assert exc.headers["WWW-Authenticate"] == 'Basic realm=\"Restricted\"'
 
-def test_authenticate_wrong_password():
+def test_authenticate_wrong_password(auth_service ):
     creds = HTTPBasicCredentials(username="admin", password="wrong")
     with pytest.raises(HTTPException) as excinfo:
         auth_service.authenticate_basic(creds)
@@ -70,13 +73,13 @@ def test_authenticate_wrong_password():
     assert exc.detail == "Incorrect username or password"
     assert exc.headers["WWW-Authenticate"] == 'Basic realm=\"Restricted\"'
 
-def test_authenticate_both_wrong():
+def test_authenticate_both_wrong(auth_service ):
     creds = HTTPBasicCredentials(username="foo", password="bar")
     with pytest.raises(HTTPException) as excinfo:
         auth_service.authenticate_basic(creds)
     assert excinfo.value.status_code == 401
 
-def test_authenticate_empty_credentials():
+def test_authenticate_empty_credentials(auth_service ):
     creds = HTTPBasicCredentials(username="", password="")
     with pytest.raises(HTTPException):
         auth_service.authenticate_basic(creds)

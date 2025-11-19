@@ -1,40 +1,10 @@
 from typing import List
 from .models import TodoItem, User
-from .auth_service import get_password_hash
+# from .auth_service import get_password_hash
 
 # In-memory Todo list
 todos: List[TodoItem] = []
 next_id: int = 1
-
-# Simple user store
-fake_users_db = {
-    "alice": {
-        "username": "alice",
-        "hashed_password": get_password_hash("wonderland"),
-        "name": "Alice Sharpe",
-        "email": "asharpe@example.com",
-        "role": "user",
-        "scopes": ["read", "write"],
-        "disabled": False,
-    },
-    "admin": {
-        "username": "admin",
-        "hashed_password": get_password_hash("secret"),
-        "name": "Admin",
-        "email": "admin@example.com",
-        "role": "admin",
-        "scopes": ["read", "write", "admin"],
-        "disabled": False,
-    },
-}
-
-class UserDB:
-    def __init__(self):
-        pass
-
-    def get_user(self, username: str) -> User:
-        user = fake_users_db.get(username)
-        return user
 
 class TodoDB:
     def __init__(self):
