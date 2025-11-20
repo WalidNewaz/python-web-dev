@@ -7,9 +7,7 @@ from typing import List
 from fastapi import Depends, APIRouter, HTTPException
 
 from app.core.db import get_db
-from app.auth.service import (
-    AuthService,
-)
+from app.auth.dependencies import get_current_user
 from app.todos.repository import TodoRepository
 from app.todos.service import TodoService
 from app.todos.schemas import TodoItem, TodoCreate
@@ -27,7 +25,7 @@ def get_todo_service(db=Depends(get_db)) -> TodoService:
 
 
 
-@router.get("", dependencies=[Depends(AuthService.get_current_user)], response_model=List[TodoItem])
+@router.get("", dependencies=[Depends(get_current_user)], response_model=List[TodoItem])
 def list_todos(
         todo_service: TodoService = Depends(get_todo_service),
 ) -> List[TodoItem]:
@@ -35,7 +33,7 @@ def list_todos(
     return todo_service.list_todos()
 
 
-@router.post("", dependencies=[Depends(AuthService.get_current_user)])
+@router.post("", dependencies=[Depends(get_current_user)])
 def create_todo(
         todo: TodoCreate,
         todo_service: TodoService = Depends(get_todo_service),
@@ -44,7 +42,7 @@ def create_todo(
     return todo_service.create_todo(title=todo.title, completed=False)
 
 
-@router.get("/{todo_id}", dependencies=[Depends(AuthService.get_current_user)])
+@router.get("/{todo_id}", dependencies=[Depends(get_current_user)])
 def get_todo(todo_id: int, todo_service: TodoService = Depends(get_todo_service)) -> TodoItem:
     """Retrieve a Todo item by ID."""
     todo = todo_service.get_todo(todo_id)
@@ -52,7 +50,7 @@ def get_todo(todo_id: int, todo_service: TodoService = Depends(get_todo_service)
         raise HTTPException(status_code=404, detail=TODO_NOT_FOUND)
     return todo
 
-@router.put("/{todo_id}", dependencies=[Depends(AuthService.get_current_user)])
+@router.put("/{todo_id}", dependencies=[Depends(get_current_user)])
 def update_todo(
         todo_id: int,
         updated_todo: TodoCreate,
@@ -64,7 +62,7 @@ def update_todo(
         raise HTTPException(status_code=404, detail=TODO_NOT_FOUND)
     return todo
 
-@router.delete("/{todo_id}", dependencies=[Depends(AuthService.get_current_user)], response_model=TodoItem)
+@router.delete("/{todo_id}", dependencies=[Depends(get_current_user)], response_model=TodoItem)
 def delete_todo(todo_id: int, todo_service: TodoService = Depends(get_todo_service)):
     """Delete a Todo item by ID."""
     todo = todo_service.delete_todo(todo_id)

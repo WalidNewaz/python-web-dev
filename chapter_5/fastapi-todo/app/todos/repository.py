@@ -22,7 +22,6 @@ class TodoRepositoryProtocol(Protocol):
 class TodoRepository(TodoRepositoryProtocol):
     def __init__(self, db: DB):
         self.db = db
-        self.next_id: int = 1
 
     def list_todos(self):
         """Return all todos."""
@@ -30,9 +29,12 @@ class TodoRepository(TodoRepositoryProtocol):
 
     def create_todo(self, title: str, completed: bool) -> TodoItemEntity:
         """Adds a new TodoItem to the database."""
-        new_todo = TodoItemEntity(id=self.next_id, title=title, completed=completed)
+        new_todo = TodoItemEntity(
+            id=len(self.db.todos) + 1,
+            title=title,
+            completed=completed
+        )
         self.db.todos.append(new_todo)
-        self.next_id += 1
         return new_todo
 
     def get_todo(self, id: int):

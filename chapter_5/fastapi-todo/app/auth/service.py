@@ -1,15 +1,13 @@
 # ============================================================
 # Business logic
 # ============================================================
-from fastapi import HTTPException, Depends, status
-from fastapi.security import OAuth2PasswordBearer, HTTPBasicCredentials, HTTPBasic
+from fastapi import HTTPException
+from fastapi.security import OAuth2PasswordBearer, HTTPBasic
 from typing import Optional, Dict
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
-import secrets
 
-from app.users.schemas import User
-from app.core.security import get_pwd_ctx
+from app.users.entities import UserEntity
 
 
 # ---------------------------------------------------------------------
@@ -31,8 +29,6 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 basic_auth_scheme = HTTPBasic()
 
-def get_auth_service(pwd_context=Depends(get_pwd_ctx)):
-    return AuthService(pwd_context)
 
 class AuthService:
     def __init__(self, pwd_context):
@@ -46,11 +42,11 @@ class AuthService:
         """Verify plain password against hashed password."""
         return self.pwd_context.verify(plain_password, hashed_password)
 
-    def authenticate_user(self, username: str, password: str, users: Dict) -> Optional[User]:
+    def authenticate_user(self, username: str, password: str, users: Dict) -> Optional[UserEntity]:
         user = users.get(username)
         if not user or not self.verify_password(password, user["hashed_password"]):
             return None
-        return User(**{k: user[k] for k in ("username", "role", "scopes", "name", "email")})
+        return UserEntity(**{k: user[k] for k in ("username", "role", "scopes", "name", "email")})
 
     # ---------------------------------------------------------------------
     # Token creation and decoding
@@ -85,37 +81,8 @@ class AuthService:
             raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
 
         new_access_token = AuthService.create_token(
-            {"sub": payload.get('sub'), "scopes": payload.get("scopes")},
+            {"sub": payload.get('sub'), "scopes": payload.get("scopes"), "role": payload.get("role")},
             expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         )
         return new_access_token
 
-    # ---------------------------------------------------------------------
-    # Dependency
-    # ---------------------------------------------------------------------
-
-    @staticmethod
-    def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
-        """Extract 'sub' (username) from JWT token."""
-        payload = AuthService.decode_token(token)
-        username = payload.get("sub")
-        if not username:
-            raise HTTPException(status_code=401, detail="Invalid token payload")
-        return username
-
-    @staticmethod
-    def authenticate_basic(credentials: HTTPBasicCredentials = Depends(basic_auth_scheme)):
-        """
-        Performs basic auth authentication check.
-        :param credentials:
-        :return:
-        """
-        correct_username = secrets.compare_digest(credentials.username, "admin")
-        correct_password = secrets.compare_digest(credentials.password, "secret")
-        if not (correct_username and correct_password):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect username or password",
-                headers={"WWW-Authenticate": 'Basic realm=\"Restricted\"'},
-            )
-        return credentials.username

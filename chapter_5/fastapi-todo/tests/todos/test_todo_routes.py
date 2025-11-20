@@ -13,7 +13,6 @@ def auth_token():
     token_instance = response.json()["access_token"]
     return token_instance
 
-
 def test_create_todo(auth_token) -> None:
     """Test the addition of a todo item."""
     headers = {"Authorization": f"Bearer {auth_token}"}

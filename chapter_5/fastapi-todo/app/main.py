@@ -13,14 +13,15 @@ from pydantic import BaseModel
 from fastapi import FastAPI, Depends
 
 # ---- Local application imports ----
-from app.auth.service import AuthService
 from app.core.logging_config import setup_logging
 from app.core.logging_middleware import register_request_logger
 from app.core.error_handlers import register_error_handlers, APIError
+from app.auth.dependencies import authenticate_basic
 
 # ---- Routers ----
 from app.auth.router import router as auth_router
 from app.todos.router import router as todos_router
+from app.users.router import router as users_router
 
 # ---- logging setup (moved) ----
 setup_logging()
@@ -33,11 +34,11 @@ register_error_handlers(app)
 # ---- Auth Routes ----
 app.include_router(auth_router)
 
-
 # ---- Todo CRUD Routes ----
 app.include_router(todos_router)
 
-
+# ---- User Routes -----
+app.include_router(users_router)
 
 # ---- Demo Routes ----
 
@@ -45,7 +46,7 @@ class BasicAuthDemoResponse(BaseModel):
     message: str
 
 @app.get("/demo/basic-auth", response_model=BasicAuthDemoResponse)
-def read_profile(username: str = Depends(AuthService.authenticate_basic)):
+def read_profile(username: str = Depends(authenticate_basic)):
     """A simple demonstration of the basic auth mechanism."""
     return {"message": f"Hello, {username}!"}
 

@@ -5,6 +5,7 @@ from jose import jwt
 
 from app.core.security import get_pwd_ctx
 from app.auth.service import AuthService, SECRET_KEY, ALGORITHM
+from app.auth.dependencies import get_current_user, authenticate_basic
 
 
 # Define a fixture to instantiate the service
@@ -34,7 +35,7 @@ def test_decode_access_token_invalid(auth_service):
 def test_get_current_user_valid(auth_service):
     """Directly test logic of get_current_user with a valid token."""
     token = auth_service.create_token({"sub": "bob"})
-    username = auth_service.get_current_user(token=token)
+    username = get_current_user(token=token)
     assert username == "bob"
 
 
@@ -47,18 +48,18 @@ def test_get_current_user_invalid(auth_service ):
     )
 
     with pytest.raises(HTTPException) as exc_info:
-        auth_service.get_current_user(token=bad_token)
+        get_current_user(token=bad_token)
     assert exc_info.value.status_code == 401
 
 def test_authenticate_success(auth_service ):
     creds = HTTPBasicCredentials(username="admin", password="secret")
-    result = auth_service.authenticate_basic(creds)
+    result = authenticate_basic(creds)
     assert result == "admin"
 
 def test_authenticate_wrong_username(auth_service ):
     creds = HTTPBasicCredentials(username="user", password="secret")
     with pytest.raises(HTTPException) as excinfo:
-        auth_service.authenticate_basic(creds)
+        authenticate_basic(creds)
     exc = excinfo.value
     assert exc.status_code == status.HTTP_401_UNAUTHORIZED
     assert exc.detail == "Incorrect username or password"
@@ -67,7 +68,7 @@ def test_authenticate_wrong_username(auth_service ):
 def test_authenticate_wrong_password(auth_service ):
     creds = HTTPBasicCredentials(username="admin", password="wrong")
     with pytest.raises(HTTPException) as excinfo:
-        auth_service.authenticate_basic(creds)
+        authenticate_basic(creds)
     exc = excinfo.value
     assert exc.status_code == status.HTTP_401_UNAUTHORIZED
     assert exc.detail == "Incorrect username or password"
@@ -76,10 +77,10 @@ def test_authenticate_wrong_password(auth_service ):
 def test_authenticate_both_wrong(auth_service ):
     creds = HTTPBasicCredentials(username="foo", password="bar")
     with pytest.raises(HTTPException) as excinfo:
-        auth_service.authenticate_basic(creds)
+        authenticate_basic(creds)
     assert excinfo.value.status_code == 401
 
 def test_authenticate_empty_credentials(auth_service ):
     creds = HTTPBasicCredentials(username="", password="")
     with pytest.raises(HTTPException):
-        auth_service.authenticate_basic(creds)
+        authenticate_basic(creds)
