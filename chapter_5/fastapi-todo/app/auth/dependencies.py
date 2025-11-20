@@ -46,7 +46,6 @@ def require_admin(
 ):
     """Ensures that routes that dependent routes are only accessible to admins."""
     db_user = user_service.get_user(username=username)
-    print("db_user", db_user)
     role = db_user.role
     if role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized")
