@@ -29,7 +29,7 @@ def test_decode_access_token_invalid(auth_service):
     with pytest.raises(HTTPException) as exc_info:
         auth_service.decode_token("not-a-jwt")
     assert exc_info.value.status_code == 401
-    assert "Invalid or expired token" in exc_info.value.detail
+    assert "Invalid token" in exc_info.value.detail
 
 
 def test_get_current_user_valid(auth_service):
