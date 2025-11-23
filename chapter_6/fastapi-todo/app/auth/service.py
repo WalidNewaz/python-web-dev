@@ -1,10 +1,10 @@
 # ============================================================
 # Business logic
 # ============================================================
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, HTTPBasic
 from typing import Optional, Dict
-from jose import jwt, JWTError
+from jose import jwt, JWTError, ExpiredSignatureError
 from datetime import datetime, timedelta, timezone
 
 from app.users.entities import UserEntity
@@ -22,8 +22,8 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/auth/token",
     scopes={
-        "read": "Read access to resources",
-        "write": "Write access to resources",
+        "read:todos": "Read access to user's todos",
+        "write:todos": "Write access to user's todos",
         "admin": "Administrative access"
     })
 
@@ -58,8 +58,19 @@ class AuthService:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             return payload
+
+        except ExpiredSignatureError:
+            # Token is structurally valid but expired
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token expired",
+            )
         except JWTError:
-            raise HTTPException(status_code=401, detail="Invalid or expired token")
+            # Invalid signature, malformed token, etc.
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+            )
 
     @staticmethod
     def create_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
