@@ -19,6 +19,9 @@ packages = [{include = "blogsite", from = "src"}]
 pytest = "^9.0.1"
 pytest-django = "^4.11.1"
 
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "blogsite.settings"
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"

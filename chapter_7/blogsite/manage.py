@@ -6,8 +6,9 @@ import sys
 from pathlib import Path
 
 # Add this BEFORE calling execute_from_command_line()
-# BASE_DIR = Path(__file__).resolve().parent
-# sys.path.append(str(BASE_DIR / "src"))
+BASE_DIR = Path(__file__).resolve().parent
+sys.path.append(str(BASE_DIR / "src"))
+
 
 def main():
     """Run administrative tasks."""
