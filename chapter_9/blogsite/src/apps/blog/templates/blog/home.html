@@ -8,7 +8,11 @@
     <h1>Welcome to the Blog</h1>
     <ul>
         {% for post in posts %}
-            <li>{{ post.title }} - {{ post.content }}</li>
+            <li>
+                <strong>{{ post.title }}</strong><br>
+                {{ post.content }}<br>
+                <em>Published {{ post.created_at|date:"Y-m-d H:i" }}</em>
+            </li>
         {% empty %}
             <li>No posts yet!</li>
         {% endfor %}
