@@ -14,6 +14,13 @@ In this chapter, you will learn:
 poetry install
 ```
 
+## Run DB migrations
+
+```commandline
+poetry run python manage.py makemigrations blog
+poetry run python manage.py migrate
+```
+
 ## Launch app
 
 Run the following command to launch the To Do API:
