@@ -7,6 +7,7 @@
 # Misc file formats
 **/*.gz
 **/*.log
+db.sqlite*
 
 # Build artifacts
 **/*.whl
