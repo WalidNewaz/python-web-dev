@@ -14,4 +14,4 @@ class Post(models.Model):
 
     def __str__(self) -> str:
         """Return a human-readable representation."""
-        return f"{self.title} ({self.created_at:%Y-%m-%d})"
+        return f"Post: {self.id} - {self.title} ({self.created_at:%Y-%m-%d})"
