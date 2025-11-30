@@ -12,6 +12,11 @@ class Post(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        permissions = [
+            ("can_publish", "Can publish posts"),
+        ]
+
     def __str__(self) -> str:
         """Return a human-readable representation."""
         return f"Post: {self.id} - {self.title} ({self.created_at:%Y-%m-%d})"
