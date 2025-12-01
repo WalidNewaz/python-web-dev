@@ -2,8 +2,23 @@
 # Core DB connection
 # ============================================================
 from typing import List
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+
 from app.core.security import get_password_hash
 from app.users.entities import UserEntity
+
+SQLALCHEMY_DATABASE_URL = "sqlite:///./todos.db"
+
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base()
+
 
 class DB:
     """
