@@ -3,7 +3,7 @@
 # ============================================================
 from typing import Optional, Iterable, List
 
-from app.core.db import get_db
+from app.core.db import get_mock_db
 from app.users.entities import UserEntity
 from app.users.repository import UserRepository
 from app.core.security import get_password_hash
@@ -39,7 +39,7 @@ class UserService:
 
 
 # Create a repo singleton
-db = get_db()
+db = get_mock_db()
 user_repo = UserRepository(db)
 
 def get_user_service() -> UserService:

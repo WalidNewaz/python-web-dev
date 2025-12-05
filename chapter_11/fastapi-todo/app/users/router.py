@@ -19,5 +19,6 @@ def list_users(
         user_service: UserService = Depends(get_user_service),
 ):
     """List all users from the database."""
+    print("Fetching users")
     fetched_users = user_service.list_users()
     return fetched_users

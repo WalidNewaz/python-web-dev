@@ -4,12 +4,12 @@
 from typing import List
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker, declarative_base, Session
 
 from app.core.security import get_password_hash
 from app.users.entities import UserEntity
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./todos.db"
+SQLALCHEMY_DATABASE_URL = "sqlite:///./db.sqlite3"
 
 
 engine = create_engine(
@@ -19,6 +19,21 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+# Create tables
+Base.metadata.create_all(bind=engine)
+
+def get_db() -> Session:
+    """Dependency to provide DB session."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+##########
+# Mock DB
+##########
 
 class DB:
     """
@@ -28,9 +43,6 @@ class DB:
     def __init__(self, users: List[dict] = None, todos: List[dict] = None):
         self.users = users or []
         self.todos = todos or []
-
-
-
 
 fake_users = [
     UserEntity(
@@ -59,5 +71,5 @@ fake_todos = []
 # Mock database instance
 mock_db = DB(fake_users, fake_todos)
 
-def get_db() -> DB:
+def get_mock_db() -> DB:
     return mock_db

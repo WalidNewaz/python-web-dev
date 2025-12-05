@@ -2,62 +2,58 @@
 # DB access layer
 # ============================================================
 from typing import Protocol, Iterable
+from sqlalchemy.orm import Session
 
-from app.todos.entities import TodoItemEntity
-from app.core.db import DB
+from app.todos.models import TodoBaseModel
 
 
 class TodoRepositoryProtocol(Protocol):
-    def list_todos(self) -> Iterable[TodoItemEntity]: ...
+    def list_todos(self) -> Iterable[TodoBaseModel ]: ...
 
-    def create_todo(self, title: str, completed: bool) -> TodoItemEntity: ...
+    def create_todo(self, title: str, completed: bool) -> TodoBaseModel : ...
 
-    def get_todo(self, id: int) -> TodoItemEntity: ...
+    def get_todo(self, id: int) -> TodoBaseModel : ...
 
-    def update_todo(self, id: int, title: str, completed: bool) -> TodoItemEntity: ...
+    def update_todo(self, id: int, title: str, completed: bool) -> TodoBaseModel : ...
 
-    def delete_todo(self, id: int) -> TodoItemEntity: ...
+    def delete_todo(self, id: int) -> TodoBaseModel : ...
 
 
 class TodoRepository(TodoRepositoryProtocol):
-    def __init__(self, db: DB):
+    def __init__(self, db: Session):
         self.db = db
 
     def list_todos(self):
         """Return all todos."""
-        return self.db.todos
+        return self.db.query(TodoBaseModel).all()
 
-    def create_todo(self, title: str, completed: bool) -> TodoItemEntity:
+    def create_todo(self, title: str, completed: bool) -> TodoBaseModel :
         """Adds a new TodoItem to the database."""
-        new_todo = TodoItemEntity(
-            id=len(self.db.todos) + 1,
-            title=title,
-            completed=completed
-        )
-        self.db.todos.append(new_todo)
+        new_todo = TodoBaseModel (title=title, completed=completed)
+        self.db.add(new_todo)
+        self.db.commit()
+        self.db.refresh(new_todo)
         return new_todo
 
     def get_todo(self, id: int):
         """Retrieve a Todo item by ID."""
-        found = next((todo for todo in self.db.todos if todo.id == id), None)
-        return found
+        found_todo = self.db.get(TodoBaseModel, id)
+        return found_todo
 
-    def update_todo(self, id: int, title: str, completed: bool) -> TodoItemEntity:
+    def update_todo(self, id: int, title: str, completed: bool) -> TodoBaseModel :
         """Update a Todo item by ID."""
-        for todo in self.db.todos:
-            if todo.id == id:
-                todo.title = title
-                todo.completed = completed
-                return todo
+        found_todo = self.get_todo(id)
+        found_todo.title = title
+        found_todo.completed = completed
+        self.db.add(found_todo)
+        self.db.commit()
+        self.db.refresh(found_todo)
+        return found_todo
 
-        return None
-
-    def delete_todo(self, id: int) -> TodoItemEntity:
+    def delete_todo(self, id: int) -> TodoBaseModel :
         """Deletes an item by ID."""
-        for i, todo in enumerate(self.db.todos):
-            if todo.id == id:
-                deleted_todo = self.db.todos.pop(i)
-                return deleted_todo
-
-        return None
-
+        found_todo = self.get_todo(id)
+        self.db.delete(found_todo)
+        self.db.commit()
+        self.db.refresh(found_todo)
+        return found_todo
