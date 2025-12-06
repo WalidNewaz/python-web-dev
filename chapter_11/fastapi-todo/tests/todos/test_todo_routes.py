@@ -1,19 +1,9 @@
 import pytest
-from fastapi.testclient import TestClient
-from app.main import app
 
-client = TestClient(app)
+from ..conftest import client, auth_token
 
-# Define a fixture to instantiate the service
-@pytest.fixture(scope="module")
-def auth_token():
-    """Login to get a token."""
-    response = client.post("/auth/token", data={"username": "alice", "password": "wonderland"})
-    assert response.status_code == 200
-    token_instance = response.json()["access_token"]
-    return token_instance
 
-def test_create_todo(auth_token) -> None:
+def test_create_todo(client, auth_token) -> None:
     """Test the addition of a todo item."""
     headers = {"Authorization": f"Bearer {auth_token}"}
     response = client.post("/api/todos", json={"title": "Learn FastAPI"}, headers=headers)
@@ -22,7 +12,7 @@ def test_create_todo(auth_token) -> None:
     assert data["title"] == "Learn FastAPI"
     assert data["completed"] is False
 
-def test_list_todos(auth_token) -> None:
+def test_list_todos(client, auth_token) -> None:
     """Test the list of todo items added."""
     headers = {"Authorization": f"Bearer {auth_token}"}
     response = client.get("/api/todos", headers=headers)
@@ -33,7 +23,7 @@ def test_list_todos(auth_token) -> None:
     assert todos[0]["title"] == "Learn FastAPI"
     assert todos[0]["completed"] is False
 
-def test_get_todo(auth_token) -> None:
+def test_get_todo(client, auth_token) -> None:
     """Test fetching a single todo item."""
     headers = {"Authorization": f"Bearer {auth_token}"}
     response = client.get("/api/todos/1", headers=headers)
@@ -42,7 +32,7 @@ def test_get_todo(auth_token) -> None:
     assert todo["title"] == "Learn FastAPI"
     assert todo["completed"] is False
 
-def test_update_todo(auth_token) -> None:
+def test_update_todo(client, auth_token) -> None:
     """Test updating an existing todo item."""
     headers = {"Authorization": f"Bearer {auth_token}"}
     response = client.put("/api/todos/1", json={"title": "Updated learning FastAPI"}, headers=headers)
@@ -51,7 +41,7 @@ def test_update_todo(auth_token) -> None:
     assert updated_todo["title"] == "Updated learning FastAPI"
     assert updated_todo["completed"] is False
 
-def test_delete_todo(auth_token) -> None:
+def test_delete_todo(client, auth_token) -> None:
     """Tests deletion of a todo item."""
     headers = {"Authorization": f"Bearer {auth_token}"}
     response = client.delete("/api/todos/1", headers=headers)
@@ -62,7 +52,7 @@ def test_delete_todo(auth_token) -> None:
     data = response.json()
     assert len(data) == 0
 
-def test_validation_error(auth_token) -> None:
+def test_validation_error(client, auth_token) -> None:
     headers = {"Authorization": f"Bearer {auth_token}"}
     response = client.post("/api/todos", json={}, headers=headers)
     assert response.status_code == 422

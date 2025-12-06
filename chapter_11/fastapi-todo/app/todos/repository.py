@@ -43,6 +43,8 @@ class TodoRepository(TodoRepositoryProtocol):
     def update_todo(self, id: int, title: str, completed: bool) -> TodoBaseModel :
         """Update a Todo item by ID."""
         found_todo = self.get_todo(id)
+        if found_todo is None:
+            return None
         found_todo.title = title
         found_todo.completed = completed
         self.db.add(found_todo)
@@ -53,7 +55,8 @@ class TodoRepository(TodoRepositoryProtocol):
     def delete_todo(self, id: int) -> TodoBaseModel :
         """Deletes an item by ID."""
         found_todo = self.get_todo(id)
+        if found_todo is None:
+            return None
         self.db.delete(found_todo)
         self.db.commit()
-        self.db.refresh(found_todo)
         return found_todo
